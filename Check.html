@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>AGS-OCE-01 Check List</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
+<style>
+  :root{
+    --primary:#25D366;
+    --primary-dark:#128C7E;
+    --primary-light:#dcf8c6;
+    --bg:#f0f2f5;
+    --card:#ffffff;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --border:#e5e7eb;
+    --danger:#ef4444;
+    --warning:#f59e0b;
+    --info:#3b82f6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{overflow-x:hidden}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    padding:16px;
+    font-size:15px;
+    line-height:1.5;
+  }
+  .container{max-width:780px;margin:0 auto}
+  header{
+    background:linear-gradient(135deg,var(--primary-dark),var(--primary));
+    color:#fff;
+    padding:20px;
+    border-radius:14px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    margin-bottom:18px;
+  }
+  header h1{font-size:20px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  header p{font-size:13px;opacity:.92}
+  .card{
+    background:var(--card);
+    border-radius:14px;
+    padding:18px;
+    margin-bottom:14px;
+    box-shadow:0 2px 6px rgba(0,0,0,.04);
+  }
+  .card h2{
+    font-size:15px;
+    color:var(--primary-dark);
+    margin-bottom:12px;
+    padding-bottom:8px;
+    border-bottom:2px solid var(--primary);
+    display:flex;align-items:center;gap:8px;
+  }
+  .field{margin-bottom:12px}
+  .field:last-child{margin-bottom:0}
+  .field label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .field input[type=text],.field input[type=datetime-local],.field textarea,.field select{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    font-size:14px;
+    font-family:inherit;
+    background:#fafbfc;
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{
+    outline:none;
+    border-color:var(--primary);
+    background:#fff;
+    box-shadow:0 0 0 3px rgba(37,211,102,.15);
+  }
+  .field textarea{resize:vertical;min-height:60px}
+  .field input[readonly]{background:#f3f4f6;color:#374151}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:11px 16px;
+    border-radius:9px;
+    font-size:14px;
+    font-weight:600;
+    border:none;
+    cursor:pointer;
+    transition:all .15s;
+    text-decoration:none;
+    color:#fff;
+  }
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:var(--primary);}
+  .btn-primary:hover{background:var(--primary-dark)}
+  .btn-secondary{background:#6b7280}
+  .btn-secondary:hover{background:#4b5563}
+  .btn-danger{background:var(--danger)}
+  .btn-warning{background:var(--warning)}
+  .btn-info{background:var(--info)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-block{width:100%}
+
+  .checklist-section{margin-bottom:8px}
+  .section-title{
+    font-size:13px;
+    font-weight:700;
+    color:var(--primary-dark);
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin:14px 0 8px;
+    padding:6px 10px;
+    background:var(--primary-light);
+    border-left:4px solid var(--primary);
+    border-radius:4px;
+  }
+  .section-title:first-child{margin-top:0}
+  .check-item{
+    display:flex;
+    align-items:center;
+    padding:10px 12px;
+    background:#fafbfc;
+    border:1px solid var(--border);
+    border-radius:9px;
+    margin-bottom:6px;
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .check-item:hover{background:#f3f4f6}
+  .check-item.checked{
+    background:var(--primary-light);
+    border-color:var(--primary);
+  }
+  .check-item input[type=checkbox]{
+    width:20px;height:20px;
+    margin-right:11px;
+    accent-color:var(--primary);
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .check-item .label{flex:1;font-size:14px}
+  .check-item.checked .label{color:var(--primary-dark);font-weight:500}
+
+  .photo-area{
+    border:2px dashed var(--border);
+    border-radius:11px;
+    padding:18px;
+    text-align:center;
+    background:#fafbfc;
+    transition:all .2s;
+  }
+  .photo-area.has-image{padding:8px;border-style:solid;background:#fff}
+  #originalPreview,#croppedPreview{
+    max-width:100%;
+    max-height:280px;
+    border-radius:8px;
+    display:block;
+    margin:8px auto;
+  }
+  #croppedPreview{border:2px solid var(--primary);background:#fff}
+  .preview-label{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:10px;
+    font-weight:600;
+  }
+  .preview-label.cropped{color:var(--primary-dark)}
+  .ocr-status{
+    font-size:13px;
+    color:var(--muted);
+    margin-top:8px;
+    min-height:18px;
+    padding:6px;
+    border-radius:6px;
+  }
+  .ocr-status.success{color:var(--primary-dark);font-weight:600;background:var(--primary-light)}
+  .ocr-status.error{color:var(--danger);background:#fee2e2}
+  .ocr-status.info{color:var(--info);background:#dbeafe}
+
+  .progress-wrap{
+    background:var(--border);
+    border-radius:10px;
+    overflow:hidden;
+    height:8px;
+    margin-top:8px;
+  }
+  .progress-bar{
+    height:100%;
+    background:linear-gradient(90deg,var(--primary),var(--primary-dark));
+    width:0%;
+    transition:width .3s;
+  }
+  .progress-text{
+    font-size:13px;
+    color:var(--muted);
+    text-align:right;
+    margin-top:4px;
+  }
+
+  .history-item{
+    background:#fafbfc;
+    border:1px solid var(--border);
+    border-radius:9px;
+    padding:11px;
+    margin-bottom:8px;
+    font-size:13px;
+  }
+  .history-item .h-date{color:var(--muted);font-size:12px}
+  .history-item .h-serial{font-weight:600;color:var(--primary-dark);font-size:14px;margin-top:2px}
+  .history-item .h-summary{margin-top:4px;color:var(--muted);font-size:12px}
+  .history-item .h-actions{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+  .history-item .btn{padding:6px 10px;font-size:12px}
+
+  .actions-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .actions-row .btn{flex:1;min-width:140px}
+
+  .badge{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:10px;
+    font-size:11px;
+    font-weight:600;
+    background:var(--primary);
+    color:#fff;
+    margin-left:6px;
+  }
+  .hidden{display:none !important}
+
+  .tabs{
+    display:flex;
+    background:#fff;
+    border-radius:10px;
+    padding:4px;
+    margin-bottom:14px;
+    box-shadow:0 2px 6px rgba(0,0,0,.04);
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:9px;
+    border-radius:7px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    color:var(--muted);
+    transition:all .15s;
+  }
+  .tab.active{background:var(--primary);color:#fff}
+
+  .modal-bg{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+    padding:16px;
+  }
+  .modal-bg.show{display:flex}
+  .modal{
+    background:#fff;
+    border-radius:14px;
+    padding:20px;
+    max-width:520px;
+    width:100%;
+    max-height:88vh;
+    overflow-y:auto;
+  }
+  .modal h3{margin-bottom:10px;color:var(--primary-dark)}
+  .modal pre{
+    background:#fafbfc;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:11px;
+    font-size:12px;
+    white-space:pre-wrap;
+    word-break:break-word;
+    margin:10px 0;
+    max-height:280px;
+    overflow-y:auto;
+    font-family:"SF Mono",Menlo,Consolas,monospace;
+  }
+  .help{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:6px;
+    line-height:1.5;
+  }
+  .help.warn{
+    background:#fef3c7;
+    border-left:3px solid var(--warning);
+    padding:8px 10px;
+    border-radius:6px;
+    color:#78350f;
+  }
+  .toast{
+    position:fixed;
+    bottom:24px;left:50%;
+    transform:translateX(-50%);
+    background:var(--text);color:#fff;
+    padding:11px 18px;
+    border-radius:9px;
+    font-size:13px;
+    z-index:2000;
+    opacity:0;
+    transition:opacity .25s;
+    pointer-events:none;
+    max-width:90%;
+  }
+  .toast.show{opacity:.95}
+
+  .quick-actions{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+  .quick-actions .btn{padding:6px 12px;font-size:12px;flex:0 0 auto}
+
+  .candidates{
+    margin-top:8px;
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .candidate-chip{
+    background:#fff;
+    border:1px solid var(--primary);
+    color:var(--primary-dark);
+    padding:5px 10px;
+    border-radius:14px;
+    font-size:12px;
+    cursor:pointer;
+    font-family:"SF Mono",Menlo,Consolas,monospace;
+  }
+  .candidate-chip:hover{background:var(--primary-light)}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📋 AGS-OCE-01 Check List</h1>
+    <p>Work Checklist + Serial Number OCR + WhatsApp Sharing</p>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="form">📝 Work Form</div>
+    <div class="tab" data-tab="history">🗂️ History</div>
+  </div>
+
+  <!-- ========== Work Form Tab ========== -->
+  <div id="tab-form">
+
+    <!-- Basic Info -->
+    <div class="card">
+      <h2>🕒 Basic Information</h2>
+      <div class="field">
+        <label for="datetime">Date &amp; Time (auto-filled)</label>
+        <input type="text" id="datetime" readonly />
+      </div>
+      <div class="field">
+        <label for="operator">Operator Name (optional)</label>
+        <input type="text" id="operator" placeholder="e.g. John Smith" autocomplete="name" />
+      </div>
+    </div>
+
+    <!-- Serial Number -->
+    <div class="card">
+      <h2>🔍 Serial Number</h2>
+      <div class="field">
+        <label>Capture / select photo of serial number</label>
+        <div class="photo-area" id="photoArea">
+          <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" />
+          <button type="button" class="btn btn-primary btn-block" id="photoBtn">📷 Take / Select Photo</button>
+          <div id="originalWrap" class="hidden">
+            <div class="preview-label">📸 Original Photo</div>
+            <img id="originalPreview" alt="original" />
+          </div>
+          <div id="croppedWrap" class="hidden">
+            <div class="preview-label cropped">✂️ Auto-cropped (image to be shared on WhatsApp)</div>
+            <img id="croppedPreview" alt="cropped" />
+          </div>
+          <div class="progress-wrap hidden" id="progressWrap">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+          <div class="ocr-status" id="ocrStatus"></div>
+          <div class="candidates" id="candidates"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="serialNumber">Serial Number (auto-filled / editable)</label>
+        <input type="text" id="serialNumber" placeholder="Will be auto-filled by OCR" autocomplete="off" />
+        <div class="quick-actions">
+          <button type="button" class="btn btn-secondary" id="rerunOcrBtn">🔄 Re-run OCR</button>
+          <button type="button" class="btn btn-info" id="manualCropBtn">✂️ Manual Crop</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="card">
+      <h2>✅ Check List for AGS-OCE-01 <span class="badge" id="checkCount">0/15</span></h2>
+      <div id="checklistContainer"></div>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="checklistBar"></div>
+      </div>
+      <div class="progress-text" id="checklistPct">0% complete</div>
+      <div class="quick-actions" style="margin-top:10px">
+        <button type="button" class="btn btn-secondary" id="checkAllBtn">☑️ Check All</button>
+        <button type="button" class="btn btn-secondary" id="uncheckAllBtn">☐ Uncheck All</button>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="card">
+      <h2>📝 Notes</h2>
+      <div class="field">
+        <textarea id="notes" placeholder="Remarks, issues, etc. (optional)"></textarea>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions-row">
+      <button class="btn btn-primary" id="shareBtn">📤 Share to WhatsApp</button>
+      <button class="btn btn-secondary" id="saveBtn">💾 Save to History</button>
+      <button class="btn btn-warning" id="previewBtn">👁️ Preview</button>
+      <button class="btn btn-danger" id="resetBtn">🔄 Reset</button>
+    </div>
+    <p class="help warn" style="margin-top:10px">
+      💡 <strong>How to share</strong>: Tap "Share to WhatsApp" — WhatsApp will open with the message pre-filled. The serial number photo is automatically downloaded — attach it from the 📎 icon in WhatsApp.<br>
+      📱 On mobile (Android Chrome / iOS Safari), the Web Share API will share text and image together in one step.
+    </p>
+  </div>
+
+  <!-- ========== History Tab ========== -->
+  <div id="tab-history" class="hidden">
+    <div class="card">
+      <h2>🗂️ Saved History</h2>
+      <div id="historyList">
+        <p class="help">No history yet.</p>
+      </div>
+      <div class="actions-row">
+        <button class="btn btn-secondary" id="exportBtn">📦 Export All as JSON</button>
+        <button class="btn btn-danger" id="clearHistoryBtn">🗑️ Clear All History</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal-bg" id="previewModal">
+  <div class="modal">
+    <h3>📤 Share Content Preview</h3>
+    <pre id="previewText"></pre>
+    <div class="actions-row">
+      <button class="btn btn-primary" id="copyBtn">📋 Copy Text</button>
+      <button class="btn btn-secondary" id="closeModal">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Manual Crop Modal -->
+<div class="modal-bg" id="cropModal">
+  <div class="modal">
+    <h3>✂️ Select Serial Number Area</h3>
+    <p class="help">Drag on the image to select the serial number area.</p>
+    <div style="position:relative;margin-top:10px;overflow:auto;max-height:60vh">
+      <canvas id="cropCanvas" style="max-width:100%;display:block;cursor:crosshair"></canvas>
+    </div>
+    <div class="actions-row">
+      <button class="btn btn-primary" id="cropConfirmBtn">✅ Crop &amp; OCR This Area</button>
+      <button class="btn btn-secondary" id="cropCancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================
+   AGS-OCE-01 Check List Web App (English Edition)
+   - Single HTML file / runs locally
+   - Tesseract.js (OCR) + Canvas (auto/manual crop)
+   - WhatsApp wa.me + Web Share API
+   - localStorage history
+============================================ */
+
+const CHECKLIST = {
+  "pre-power": [
+    "Check appearance and accessories.",
+    "Remove all protective materials.",
+    "Check the UPS voltage."
+  ],
+  "startup": [
+    "Turn on power and check startup.",
+    "Check the monitor for dead pixels.",
+    "Connect the LAN cable.",
+    "Ping 8.8.8.8 to check the network."
+  ],
+  "device": [
+    "Test the printer.",
+    "Check the Payout CDU door.",
+    "Test the Bill Validator.",
+    "Test the Passport reader.",
+    "Test the NFC reader.",
+    "Check the Front camera.",
+    "Check the Face recognition camera.",
+    "Check the Document camera.",
+    "Check the Maintenance camera."
+  ]
+};
+
+const SECTION_TITLES = {
+  "pre-power": "Pre-Power-On Checks",
+  "startup":   "Startup & Network Checks",
+  "device":    "Device Tests"
+};
+
+// ===== Utilities =====
+const $  = (s, root=document) => root.querySelector(s);
+const $$ = (s, root=document) => [...root.querySelectorAll(s)];
+const pad = n => String(n).padStart(2,'0');
+function nowStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+function showToast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>t.classList.remove('show'), 2500);
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ===== Init =====
+function initDateTime(){ $('#datetime').value = nowStr(); }
+
+function buildChecklist(){
+  const container = $('#checklistContainer');
+  container.innerHTML = '';
+  Object.keys(CHECKLIST).forEach(key=>{
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'section-title';
+    titleDiv.textContent = SECTION_TITLES[key];
+    container.appendChild(titleDiv);
+
+    const sec = document.createElement('div');
+    sec.className = 'checklist-section';
+    sec.dataset.section = key;
+    CHECKLIST[key].forEach((label,i)=>{
+      const id = `chk-${key}-${i}`;
+      const div = document.createElement('label');
+      div.className = 'check-item';
+      div.innerHTML = `
+        <input type="checkbox" id="${id}" data-section="${key}" data-index="${i}" />
+        <span class="label">${escapeHtml(label)}</span>
+      `;
+      const cb = div.querySelector('input');
+      cb.addEventListener('change', ()=>{
+        div.classList.toggle('checked', cb.checked);
+        updateProgress();
+      });
+      sec.appendChild(div);
+    });
+    container.appendChild(sec);
+  });
+  updateProgress();
+}
+
+function updateProgress(){
+  const all = $$('input[type=checkbox][data-section]');
+  const done = all.filter(c=>c.checked).length;
+  const pct = all.length ? Math.round(done/all.length*100) : 0;
+  $('#checkCount').textContent = `${done}/${all.length}`;
+  $('#checklistBar').style.width = pct+'%';
+  $('#checklistPct').textContent = `${pct}% complete`;
+}
+
+// ===== Tabs =====
+$$('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    $$('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    const tab = t.dataset.tab;
+    $('#tab-form').classList.toggle('hidden', tab!=='form');
+    $('#tab-history').classList.toggle('hidden', tab!=='history');
+    if(tab==='history') renderHistory();
+  });
+});
+
+// ===== Check All / Uncheck All =====
+$('#checkAllBtn').addEventListener('click', ()=>{
+  $$('input[type=checkbox][data-section]').forEach(cb=>{
+    cb.checked = true;
+    cb.parentElement.classList.add('checked');
+  });
+  updateProgress();
+});
+$('#uncheckAllBtn').addEventListener('click', ()=>{
+  $$('input[type=checkbox][data-section]').forEach(cb=>{
+    cb.checked = false;
+    cb.parentElement.classList.remove('checked');
+  });
+  updateProgress();
+});
+
+// ===== Photo capture → OCR → auto-crop =====
+let originalImageDataURL = null;
+let resizedImageDataURL  = null;
+let croppedImageDataURL  = null;
+
+$('#photoBtn').addEventListener('click', ()=> $('#photoInput').click());
+
+$('#photoInput').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev)=>{
+    originalImageDataURL = ev.target.result;
+    $('#originalPreview').src = originalImageDataURL;
+    $('#originalWrap').classList.remove('hidden');
+    $('#photoArea').classList.add('has-image');
+    $('#croppedWrap').classList.add('hidden');
+    $('#candidates').innerHTML = '';
+    resizedImageDataURL = await resizeImage(originalImageDataURL, 1600);
+    await runOCR(resizedImageDataURL);
+  };
+  reader.readAsDataURL(file);
+});
+
+$('#rerunOcrBtn').addEventListener('click', async ()=>{
+  if(!resizedImageDataURL){ showToast('Please select a photo first'); return; }
+  await runOCR(resizedImageDataURL);
+});
+
+// Score how "serial-number-like" a string is
+function serialScore(text){
+  const t = (text||'').trim();
+  if(!t) return 0;
+  if(t.length < 5 || t.length > 40) return 0;
+  if(/[^A-Za-z0-9\-_/]/.test(t)) return 0;
+
+  let score = 0;
+  if(/[A-Za-z]/.test(t) && /[0-9]/.test(t)) score += 50;
+  if(/^[A-Z0-9\-]+$/.test(t)) score += 20;
+  if(t.length>=8 && t.length<=20) score += 20;
+  if(/^[0-9]{8,}$/.test(t)) score += 30;
+  if(/[A-Z0-9]+-[A-Z0-9]+/i.test(t)) score += 10;
+  const vowels = (t.match(/[AEIOUaeiou]/g)||[]).length;
+  if(vowels > t.length*0.5) score -= 15;
+  return score;
+}
+
+async function runOCR(dataURL){
+  const status = $('#ocrStatus');
+  const bar = $('#progressBar');
+  const wrap = $('#progressWrap');
+  const candWrap = $('#candidates');
+  candWrap.innerHTML = '';
+  status.textContent = '🔎 Running OCR... (first run downloads the model, please wait)';
+  status.className = 'ocr-status info';
+  wrap.classList.remove('hidden');
+  bar.style.width = '0%';
+
+  try{
+    const result = await Tesseract.recognize(dataURL, 'eng', {
+      logger: m => {
+        if(m.status === 'recognizing text'){
+          bar.style.width = (m.progress*100).toFixed(0)+'%';
+        } else if(m.status){
+          status.textContent = `🔎 ${m.status}... ${m.progress?Math.round(m.progress*100)+'%':''}`;
+        }
+      }
+    });
+
+    const words = (result.data && result.data.words) ? result.data.words : [];
+    const scored = words.map(w=>({
+      text: (w.text||'').trim(),
+      conf: w.confidence||0,
+      bbox: w.bbox,
+      score: serialScore(w.text) + (w.confidence||0)*0.3
+    })).filter(x=>x.score > 30);
+
+    const lines = (result.data.lines||[]).map(l=>{
+      const text = (l.text||'').trim();
+      const cleaned = text.replace(/^(s\/?n|serial(\s*number)?|ser|sn|model|p\/?n|part(\s*number)?)\s*[:#=]\s*/i,'').trim();
+      const tokens = cleaned.split(/\s+/);
+      let best = null;
+      tokens.forEach(tk=>{
+        const sc = serialScore(tk);
+        if(!best || sc > best.score) best = {text:tk, score:sc};
+      });
+      return best ? {text:best.text, conf:l.confidence||0, bbox:l.bbox, score:best.score + (l.confidence||0)*0.3} : null;
+    }).filter(x=>x && x.score > 30);
+
+    const all = [...scored, ...lines];
+    const seen = new Set();
+    const unique = all.filter(x=>{
+      if(seen.has(x.text)) return false;
+      seen.add(x.text);
+      return true;
+    }).sort((a,b)=>b.score-a.score);
+
+    if(unique.length){
+      const best = unique[0];
+      $('#serialNumber').value = best.text;
+
+      croppedImageDataURL = await cropImage(dataURL, best.bbox, 30);
+      $('#croppedPreview').src = croppedImageDataURL;
+      $('#croppedWrap').classList.remove('hidden');
+
+      status.textContent = `✅ Detected serial number: ${best.text} (confidence ${Math.round(best.conf)}%)`;
+      status.className = 'ocr-status success';
+
+      if(unique.length>1){
+        candWrap.innerHTML = '<span class="help" style="width:100%">Other candidates (tap to switch):</span>';
+        unique.slice(1,6).forEach(c=>{
+          const chip = document.createElement('span');
+          chip.className = 'candidate-chip';
+          chip.textContent = c.text;
+          chip.addEventListener('click', async ()=>{
+            $('#serialNumber').value = c.text;
+            croppedImageDataURL = await cropImage(dataURL, c.bbox, 30);
+            $('#croppedPreview').src = croppedImageDataURL;
+            status.textContent = `✅ Switched candidate: ${c.text}`;
+          });
+          candWrap.appendChild(chip);
+        });
+      }
+    } else {
+      const fullText = (result.data.text || '').trim();
+      status.textContent = `⚠️ Could not auto-detect. Please pick from the recognized text below.`;
+      status.className = 'ocr-status error';
+      if(fullText){
+        candWrap.innerHTML = '<span class="help" style="width:100%">Recognized tokens (tap to use):</span>';
+        const tokens = [...new Set(fullText.split(/\s+/).filter(t=>t.length>=4 && /[A-Za-z0-9]/.test(t)))];
+        tokens.slice(0,8).forEach(t=>{
+          const chip = document.createElement('span');
+          chip.className = 'candidate-chip';
+          chip.textContent = t;
+          chip.addEventListener('click', ()=>{
+            $('#serialNumber').value = t;
+            status.textContent = `✏️ Manually selected: ${t}`;
+          });
+          candWrap.appendChild(chip);
+        });
+      }
+      croppedImageDataURL = dataURL;
+      $('#croppedPreview').src = croppedImageDataURL;
+      $('#croppedWrap').classList.remove('hidden');
+    }
+  } catch(err){
+    console.error(err);
+    status.textContent = `❌ OCR error: ${err.message||err}`;
+    status.className = 'ocr-status error';
+    croppedImageDataURL = dataURL;
+  } finally {
+    setTimeout(()=>wrap.classList.add('hidden'), 800);
+  }
+}
+
+function resizeImage(dataURL, maxSide){
+  return new Promise((resolve)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const r = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const w = Math.round(img.width * r);
+      const h = Math.round(img.height * r);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(c.toDataURL('image/jpeg', 0.9));
+    };
+    img.onerror = ()=>resolve(dataURL);
+    img.src = dataURL;
+  });
+}
+
+function cropImage(dataURL, bbox, padding=20){
+  return new Promise((resolve)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const x = Math.max(0, bbox.x0 - padding);
+      const y = Math.max(0, bbox.y0 - padding);
+      const w = Math.min(img.width  - x, (bbox.x1 - bbox.x0) + padding*2);
+      const h = Math.min(img.height - y, (bbox.y1 - bbox.y0) + padding*2);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, x, y, w, h, 0, 0, w, h);
+      resolve(c.toDataURL('image/jpeg', 0.92));
+    };
+    img.onerror = ()=>resolve(dataURL);
+    img.src = dataURL;
+  });
+}
+
+// ===== Manual Crop =====
+let cropState = null;
+$('#manualCropBtn').addEventListener('click', ()=>{
+  if(!resizedImageDataURL){ showToast('Please select a photo first'); return; }
+  openCropModal();
+});
+
+function openCropModal(){
+  const canvas = $('#cropCanvas');
+  const ctx = canvas.getContext('2d');
+  const img = new Image();
+  img.onload = ()=>{
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0);
+    cropState = { img, ctx, canvas, start:null, end:null, dragging:false };
+    $('#cropModal').classList.add('show');
+  };
+  img.src = resizedImageDataURL;
+}
+
+(function setupCropEvents(){
+  const canvas = $('#cropCanvas');
+  function getPos(e){
+    const rect = canvas.getBoundingClientRect();
+    const sx = canvas.width / rect.width;
+    const sy = canvas.height / rect.height;
+    const t = e.touches ? e.touches[0] : e;
+    return { x:(t.clientX - rect.left)*sx, y:(t.clientY - rect.top)*sy };
+  }
+  function redraw(){
+    if(!cropState) return;
+    const {ctx,img,start,end} = cropState;
+    ctx.drawImage(img, 0, 0);
+    if(start && end){
+      const x = Math.min(start.x,end.x), y = Math.min(start.y,end.y);
+      const w = Math.abs(end.x-start.x), h = Math.abs(end.y-start.y);
+      ctx.fillStyle = 'rgba(0,0,0,.4)';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.clearRect(x,y,w,h);
+      ctx.drawImage(img, x,y,w,h, x,y,w,h);
+      ctx.strokeStyle = '#25D366'; ctx.lineWidth = 3;
+      ctx.strokeRect(x,y,w,h);
+    }
+  }
+  function onDown(e){
+    if(!cropState) return;
+    e.preventDefault();
+    cropState.start = getPos(e);
+    cropState.end = cropState.start;
+    cropState.dragging = true;
+    redraw();
+  }
+  function onMove(e){
+    if(!cropState || !cropState.dragging) return;
+    e.preventDefault();
+    cropState.end = getPos(e);
+    redraw();
+  }
+  function onUp(){
+    if(!cropState) return;
+    cropState.dragging = false;
+  }
+  canvas.addEventListener('mousedown', onDown);
+  canvas.addEventListener('mousemove', onMove);
+  canvas.addEventListener('mouseup', onUp);
+  canvas.addEventListener('touchstart', onDown, {passive:false});
+  canvas.addEventListener('touchmove', onMove, {passive:false});
+  canvas.addEventListener('touchend', onUp);
+})();
+
+$('#cropCancelBtn').addEventListener('click', ()=>{
+  $('#cropModal').classList.remove('show');
+  cropState = null;
+});
+
+$('#cropConfirmBtn').addEventListener('click', async ()=>{
+  if(!cropState || !cropState.start || !cropState.end){
+    showToast('Please select an area'); return;
+  }
+  const {start,end,img} = cropState;
+  const x = Math.min(start.x,end.x), y = Math.min(start.y,end.y);
+  const w = Math.abs(end.x-start.x), h = Math.abs(end.y-start.y);
+  if(w<10 || h<10){ showToast('Area is too small'); return; }
+
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  c.getContext('2d').drawImage(img, x,y,w,h, 0,0,w,h);
+  croppedImageDataURL = c.toDataURL('image/jpeg', 0.92);
+  $('#croppedPreview').src = croppedImageDataURL;
+  $('#croppedWrap').classList.remove('hidden');
+  $('#cropModal').classList.remove('show');
+
+  const status = $('#ocrStatus');
+  status.textContent = '🔎 Running OCR on cropped area...';
+  status.className = 'ocr-status info';
+  try{
+    const result = await Tesseract.recognize(croppedImageDataURL, 'eng');
+    const txt = (result.data.text||'').trim().split(/\s+/).filter(Boolean);
+    let best = null;
+    txt.forEach(t=>{
+      const sc = serialScore(t);
+      if(!best || sc > best.score) best = {text:t, score:sc};
+    });
+    if(best && best.score>0){
+      $('#serialNumber').value = best.text;
+      status.textContent = `✅ Detected serial number: ${best.text}`;
+      status.className = 'ocr-status success';
+    } else if(txt.length){
+      $('#serialNumber').value = txt[0];
+      status.textContent = `⚠️ Recognized: ${txt.join(' ')}`;
+      status.className = 'ocr-status info';
+    } else {
+      status.textContent = '⚠️ No text recognized';
+      status.className = 'ocr-status error';
+    }
+  }catch(e){
+    status.textContent = `❌ OCR error: ${e.message||e}`;
+    status.className = 'ocr-status error';
+  }
+  cropState = null;
+});
+
+// ===== Build share text =====
+function buildShareText(){
+  const dt = $('#datetime').value || nowStr();
+  const op = $('#operator').value.trim();
+  const sn = $('#serialNumber').value.trim() || '(not entered)';
+  const notes = $('#notes').value.trim();
+
+  let text = '📋 *Check List for AGS-OCE-01*\n';
+  text += `🕒 Date/Time: ${dt}\n`;
+  if(op) text += `👤 Operator: ${op}\n`;
+  text += `🔢 Serial Number: *${sn}*\n`;
+  text += '─────────────\n';
+
+  Object.keys(CHECKLIST).forEach(key=>{
+    text += `\n*${SECTION_TITLES[key]}*\n`;
+    CHECKLIST[key].forEach((label,i)=>{
+      const cb = $(`#chk-${key}-${i}`);
+      const mark = cb && cb.checked ? '✅' : '⬜';
+      text += `${mark} ${label}\n`;
+    });
+  });
+
+  const all = $$('input[type=checkbox][data-section]');
+  const done = all.filter(c=>c.checked).length;
+  text += `\n─────────────\n📊 Progress: ${done}/${all.length} (${Math.round(done/all.length*100)}%)\n`;
+  if(notes) text += `\n📝 Notes:\n${notes}\n`;
+  return text;
+}
+
+// ===== Preview =====
+$('#previewBtn').addEventListener('click', ()=>{
+  $('#previewText').textContent = buildShareText();
+  $('#previewModal').classList.add('show');
+});
+$('#closeModal').addEventListener('click', ()=> $('#previewModal').classList.remove('show'));
+$('#previewModal').addEventListener('click', (e)=>{
+  if(e.target.id==='previewModal') $('#previewModal').classList.remove('show');
+});
+$('#copyBtn').addEventListener('click', async ()=>{
+  try{
+    await navigator.clipboard.writeText($('#previewText').textContent);
+    showToast('📋 Text copied to clipboard');
+  }catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = $('#previewText').textContent;
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('📋 Text copied to clipboard');
+  }
+});
+
+// ===== WhatsApp share =====
+$('#shareBtn').addEventListener('click', async ()=>{
+  const text = buildShareText();
+
+  if(croppedImageDataURL && navigator.canShare){
+    try{
+      const blob = await (await fetch(croppedImageDataURL)).blob();
+      const sn = $('#serialNumber').value.trim() || 'serial';
+      const filename = `serial_${sn.replace(/[^A-Za-z0-9_-]/g,'_')}.jpg`;
+      const file = new File([blob], filename, {type:'image/jpeg'});
+      if(navigator.canShare({ files:[file], text })){
+        await navigator.share({ files:[file], text, title:'AGS-OCE-01 Check List' });
+        showToast('📤 Shared');
+        return;
+      }
+    }catch(e){
+      console.warn('Web Share API failed', e);
+      if(e.name === 'AbortError') return;
+    }
+  }
+
+  if(croppedImageDataURL){
+    const sn = $('#serialNumber').value.trim() || 'serial';
+    const filename = `serial_${sn.replace(/[^A-Za-z0-9_-]/g,'_')}_${Date.now()}.jpg`;
+    downloadDataURL(croppedImageDataURL, filename);
+    showToast(`📷 Photo downloaded: ${filename}`);
+  }
+
+  try{ await navigator.clipboard.writeText(text); }catch(e){}
+
+  const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+});
+
+function downloadDataURL(dataURL, filename){
+  const a = document.createElement('a');
+  a.href = dataURL;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+// ===== History (localStorage) =====
+const STORAGE_KEY = 'ags_oce_01_history_v1';
+function loadHistory(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch(e){ return []; }
+}
+function saveHistoryArr(arr){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    return true;
+  }catch(e){
+    showToast('⚠️ Storage limit reached: removing old images');
+    arr.forEach((h,i)=>{ if(i>=5) h.image=null; });
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+      return true;
+    }catch(e2){
+      arr.forEach(h=>{ h.image=null; });
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); return true; }catch(e3){ return false; }
+    }
+  }
+}
+
+$('#saveBtn').addEventListener('click', ()=>{
+  const all = $$('input[type=checkbox][data-section]');
+  const checks = {};
+  Object.keys(CHECKLIST).forEach(key=>{
+    checks[key] = CHECKLIST[key].map((label,i)=>({
+      label,
+      checked: $(`#chk-${key}-${i}`).checked
+    }));
+  });
+  const record = {
+    id: Date.now(),
+    datetime: $('#datetime').value || nowStr(),
+    operator: $('#operator').value.trim(),
+    serial: $('#serialNumber').value.trim(),
+    checks,
+    notes: $('#notes').value.trim(),
+    progress: `${all.filter(c=>c.checked).length}/${all.length}`,
+    image: croppedImageDataURL || null
+  };
+  const hist = loadHistory();
+  hist.unshift(record);
+  hist.forEach((h,i)=>{ if(i>=20) h.image = null; });
+  if(saveHistoryArr(hist)) showToast('💾 Saved to history');
+  else showToast('❌ Failed to save history');
+});
+
+function renderHistory(){
+  const hist = loadHistory();
+  const list = $('#historyList');
+  if(!hist.length){
+    list.innerHTML = '<p class="help">No history yet.</p>';
+    return;
+  }
+  list.innerHTML = hist.map(h=>`
+    <div class="history-item">
+      <div class="h-date">${escapeHtml(h.datetime)}</div>
+      <div class="h-serial">🔢 ${escapeHtml(h.serial || '(no serial number)')}</div>
+      <div class="h-summary">${h.operator ? '👤 '+escapeHtml(h.operator)+' / ' : ''}Progress ${escapeHtml(h.progress)}${h.notes ? ' / has notes' : ''}${h.image ? ' / 📷' : ''}</div>
+      <div class="h-actions">
+        <button class="btn btn-primary" onclick="reshareHistory(${h.id})">📤 Re-share</button>
+        <button class="btn btn-secondary" onclick="loadHistoryRecord(${h.id})">📂 Load</button>
+        <button class="btn btn-danger" onclick="deleteHistoryRecord(${h.id})">🗑️ Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+window.reshareHistory = async function(id){
+  const h = loadHistory().find(x=>x.id===id);
+  if(!h) return;
+  let text = '📋 *Check List for AGS-OCE-01*\n';
+  text += `🕒 Date/Time: ${h.datetime}\n`;
+  if(h.operator) text += `👤 Operator: ${h.operator}\n`;
+  text += `🔢 Serial Number: *${h.serial||'(not entered)'}*\n─────────────\n`;
+  Object.keys(h.checks).forEach(key=>{
+    text += `\n*${SECTION_TITLES[key]}*\n`;
+    h.checks[key].forEach(c=>{
+      text += `${c.checked?'✅':'⬜'} ${c.label}\n`;
+    });
+  });
+  text += `\n─────────────\n📊 Progress: ${h.progress}\n`;
+  if(h.notes) text += `\n📝 Notes:\n${h.notes}\n`;
+
+  if(h.image && navigator.canShare){
+    try{
+      const blob = await (await fetch(h.image)).blob();
+      const file = new File([blob],'serial.jpg',{type:'image/jpeg'});
+      if(navigator.canShare({files:[file], text})){
+        await navigator.share({files:[file], text, title:'AGS-OCE-01 Check List'});
+        return;
+      }
+    }catch(e){ if(e.name==='AbortError') return; }
+  }
+
+  if(h.image){
+    const filename = `serial_${(h.serial||'serial').replace(/[^A-Za-z0-9_-]/g,'_')}_${h.id}.jpg`;
+    downloadDataURL(h.image, filename);
+    showToast(`📷 Photo downloaded: ${filename}`);
+  }
+  try{ await navigator.clipboard.writeText(text); }catch(e){}
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`,'_blank');
+};
+
+window.loadHistoryRecord = function(id){
+  const h = loadHistory().find(x=>x.id===id);
+  if(!h) return;
+  $('#datetime').value = h.datetime;
+  $('#operator').value = h.operator || '';
+  $('#serialNumber').value = h.serial || '';
+  $('#notes').value = h.notes || '';
+  Object.keys(h.checks).forEach(key=>{
+    h.checks[key].forEach((c,i)=>{
+      const cb = $(`#chk-${key}-${i}`);
+      if(cb){ cb.checked = c.checked; cb.parentElement.classList.toggle('checked', c.checked); }
+    });
+  });
+  if(h.image){
+    croppedImageDataURL = h.image;
+    resizedImageDataURL = h.image;
+    $('#croppedPreview').src = h.image;
+    $('#croppedWrap').classList.remove('hidden');
+    $('#photoArea').classList.add('has-image');
+  }
+  updateProgress();
+  $$('.tab')[0].click();
+  showToast('📂 Loaded from history');
+};
+
+window.deleteHistoryRecord = function(id){
+  if(!confirm('Delete this record?')) return;
+  saveHistoryArr(loadHistory().filter(x=>x.id!==id));
+  renderHistory();
+  showToast('🗑️ Deleted');
+};
+
+$('#clearHistoryBtn').addEventListener('click', ()=>{
+  if(!confirm('Delete all history. Are you sure?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  renderHistory();
+  showToast('🗑️ All history cleared');
+});
+
+$('#exportBtn').addEventListener('click', ()=>{
+  const hist = loadHistory();
+  if(!hist.length){ showToast('No history to export'); return; }
+  const blob = new Blob([JSON.stringify(hist,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ags_oce_01_history_${Date.now()}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('📦 Exported');
+});
+
+// ===== Reset =====
+$('#resetBtn').addEventListener('click', ()=>{
+  if(!confirm('Reset all input?')) return;
+  $('#operator').value = '';
+  $('#serialNumber').value = '';
+  $('#notes').value = '';
+  $$('input[type=checkbox][data-section]').forEach(cb=>{
+    cb.checked = false;
+    cb.parentElement.classList.remove('checked');
+  });
+  originalImageDataURL = null;
+  resizedImageDataURL  = null;
+  croppedImageDataURL  = null;
+  $('#originalWrap').classList.add('hidden');
+  $('#croppedWrap').classList.add('hidden');
+  $('#photoArea').classList.remove('has-image');
+  $('#ocrStatus').textContent = '';
+  $('#ocrStatus').className = 'ocr-status';
+  $('#candidates').innerHTML = '';
+  $('#photoInput').value = '';
+  initDateTime();
+  updateProgress();
+  showToast('🔄 Reset');
+});
+
+// ===== Boot =====
+initDateTime();
+buildChecklist();
+setInterval(()=>{
+  if(document.activeElement && document.activeElement.id !== 'datetime'){
+    initDateTime();
+  }
+}, 1000);
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
