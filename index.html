@@ -1,94 +1,438 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ISL AI Virtual Office</title>
-    <style>
-        :root { --primary: #1A365D; --bg: #F7FAFC; --card: #FFFFFF; --text: #2D3748; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); padding: 15px; }
-        .header { background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: center; font-weight: bold; font-size: 1.2rem; }
-        .card { background: var(--card); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #4A5568; }
-        input, textarea { width: 100%; padding: 12px; border: 1px solid #E2E8F0; border-radius: 8px; margin-bottom: 12px; font-size: 1rem; }
-        button { width: 100%; background: #3182CE; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button:hover { background: #2B6CB0; }
-        .agent-box { border-left: 4px solid #3182CE; padding-left: 10px; margin-top: 15px; background: #EBF8FF; padding: 10px; border-radius: 4px; }
-        .cs { border-color: #3182CE; background: #EBF8FF; }
-        .tech { border-color: #319795; background: #E6FFFA; }
-        .sales { border-color: #DD6B20; background: #FFFAF0; }
-        .loading { text-align: center; color: #718096; display: none; margin: 10px 0; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Onsite Support Manager v1.4.1</title>
+<style>
+  :root{--bg:#f3f5f9;--card:#ffffff;--primary:#1a73e8;--primary-dark:#1557b0;--danger:#d93025;--success:#188038;--warn:#f29900;--text:#202124;--muted:#5f6368;--border:#dadce0;--chip:#e8f0fe;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:15px;line-height:1.45}
+  header{position:sticky;top:0;z-index:50;background:var(--primary);color:#fff;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 4px rgba(0,0,0,.1)}
+  header h1{margin:0;font-size:17px;font-weight:600}
+  header .badge{font-size:11px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:10px}
+  nav{display:flex;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:46px;z-index:40}
+  nav button{flex:1;border:0;background:transparent;padding:11px 4px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:.15s}
+  nav button.active{color:var(--primary);border-bottom-color:var(--primary)}
+  main{padding:14px;max-width:680px;margin:0 auto;padding-bottom:90px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .card h3{margin:0 0 6px 0;font-size:15px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .row + .row{margin-top:6px}
+  label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;font-weight:600}
+  input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:#fff;font-family:inherit}
+  textarea{resize:vertical;min-height:70px}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--primary);border-color:transparent}
+  button.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border:0;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;background:var(--primary);color:#fff;transition:.15s}
+  button.btn:hover{background:var(--primary-dark)}
+  button.btn.secondary{background:#fff;color:var(--primary);border:1px solid var(--primary)}
+  button.btn.danger{background:var(--danger)}
+  button.btn.success{background:var(--success)}
+  button.btn.warn{background:var(--warn);color:#222}
+  button.btn:disabled{opacity:.55;cursor:not-allowed}
+  .chip{display:inline-block;background:var(--chip);color:var(--primary-dark);border-radius:12px;padding:2px 9px;font-size:11px;font-weight:600;margin-right:4px}
+  .chip.open{background:#fce8e6;color:var(--danger)}
+  .chip.resolved{background:#e6f4ea;color:var(--success)}
+  .chip.unsolved{background:#fef7e0;color:#b06000}
+  .ticket{cursor:pointer}
+  .ticket .ticket-h{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+  .ticket .ticket-t{font-weight:600;margin:3px 0;font-size:14px}
+  .empty{text-align:center;color:var(--muted);padding:30px 14px}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:100}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;border-radius:14px 14px 0 0;padding:18px 16px 100px;animation:slideUp .2s}
+  @media(min-width:680px){.modal-bg{align-items:center}.modal{border-radius:14px;padding:18px}}
+  @keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .modal h2{margin:0 0 4px;font-size:18px}
+  .modal-actions{position:sticky;bottom:-1px;background:#fff;padding-top:12px;margin-top:14px;border-top:1px solid var(--border);display:flex;gap:8px}
+  .modal-actions .btn{flex:1}
+  .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#202124;color:#fff;padding:11px 18px;border-radius:25px;font-size:13px;z-index:200;box-shadow:0 4px 10px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .25s;max-width:90vw;text-align:center}
+  .toast.show{opacity:1}
+  .toast.error{background:var(--danger)}
+  .loader{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .month-group{margin-bottom:14px}
+  .month-group .month-head{display:flex;justify-content:space-between;align-items:center;background:#e8eaed;padding:8px 12px;border-radius:8px;margin-bottom:6px;font-weight:600;font-size:13px}
+  .danger-link{color:var(--danger);text-decoration:underline;cursor:pointer;font-size:12px}
+  .help{font-size:11px;color:var(--muted);margin-top:4px}
+  kbd{background:#eee;padding:1px 5px;border-radius:3px;font-family:monospace;font-size:11px}
+  .ver{font-size:9px;opacity:.7;margin-left:4px}
+  .checkbox-list {
+    max-height: 180px; overflow-y: auto; 
+    border: 1px solid var(--border); border-radius: 8px; 
+    padding: 8px 12px; background: #fff;
+  }
+  .checkbox-item {
+    display: flex; align-items: center; gap: 8px; 
+    margin-bottom: 6px; font-size: 14px; font-weight: normal; color: var(--text);
+  }
+  .checkbox-item input { width: 16px; height: 16px; padding: 0; margin: 0; }
+  .checkbox-item:last-child { margin-bottom: 0; }
+</style>
 </head>
 <body>
-
-    <div class="header">🏛️ ISL AI MOBILE OFFICE</div>
-
+<header>
+  <h1>🛠 Onsite Support<span class="ver">v1.4.1</span></h1>
+  <span class="badge" id="connBadge">offline</span>
+</header>
+<nav>
+  <button data-tab="new" class="active">New</button>
+  <button data-tab="open">Open <span id="openCount" class="chip open" style="display:none">0</span></button>
+  <button data-tab="resolved">Resolved</button>
+  <button data-tab="settings">⚙</button>
+</nav>
+<main>
+  <section id="tab-new">
     <div class="card">
-        <label>👤 顧客氏名（名簿照合用）</label>
-        <input type="text" id="senderName" value="川村 健太" placeholder="例: 川村 健太">
-        
-        <label>💬 お問い合わせ内容・依頼</label>
-        <textarea id="messageContent" rows="4" placeholder="例: Fortinetのファイアウォールを2台レンタルしたい。見積もりをください。"></textarea>
-        
-        <button onclick="launchAIOffice()">🚀 AI作戦会議を招集する</button>
-        <div class="loading" id="loader">⏳ ローカルGPU(GTX1080)でAIエージェントが思考中...</div>
+      <h3>📝 Create Request</h3>
+      <p class="help">Submit a new support request.</p>
+      
+      <label>Requester</label><select id="f_requester"><option value="">— select —</option></select>
+      
+      <label>Serial Numbers (Select multiple)</label>
+      <div id="f_serial_container" class="checkbox-list">
+        </div>
+      
+      <label>Type</label><select id="f_troubleType"><option value="">— select —</option></select>
+      <label>Detail</label><textarea id="f_troubleDetail" placeholder="Describe the issue..."></textarea>
+      
+      <label>📸 Photos (Max 2)</label>
+      <div class="row" style="gap:12px; align-items: flex-start; margin-bottom: 10px;">
+        <div style="flex:1;">
+          <input type="file" id="f_photo1" accept="image/*" style="display:none;">
+          <button class="btn secondary" id="btnPhoto1" type="button" style="width:100%; padding:8px 0;">+ Photo 1</button>
+          <div id="prev_photo1" style="margin-top:6px; text-align:center;"></div>
+        </div>
+        <div style="flex:1;">
+          <input type="file" id="f_photo2" accept="image/*" style="display:none;">
+          <button class="btn secondary" id="btnPhoto2" type="button" style="width:100%; padding:8px 0;">+ Photo 2</button>
+          <div id="prev_photo2" style="margin-top:6px; text-align:center;"></div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:14px">
+        <button class="btn" id="btnCreate">Submit Request</button>
+        <button class="btn secondary" id="btnClear">Clear</button>
+      </div>
     </div>
-
-    <div id="results" style="display: none;">
-        <div class="card">
-            <h4>📊 顧客認識結果</h4>
-            <p id="custInfo" style="font-weight: bold; color: var(--primary); margin-top: 5px;"></p>
-        </div>
-        <div class="card agent-box cs">
-            <strong>💁‍♀️ CS担当 (AI) の分析</strong>
-            <p id="csRes" style="margin-top:5px; white-space: pre-wrap;"></p>
-        </div>
-        <div class="card agent-box tech">
-            <strong>🛠️ 技術スタッフ (AI) の構成案</strong>
-            <p id="techRes" style="margin-top:5px; white-space: pre-wrap;"></p>
-        </div>
-        <div class="card agent-box sales">
-            <strong>💰 営業担当 (AI) の最終査定 & 明細</strong>
-            <p id="salesRes" style="margin-top:5px; white-space: pre-wrap;"></p>
-        </div>
+  </section>
+  <section id="tab-open" hidden>
+    <div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">🚨 Open Tickets</h3><button class="btn secondary" id="btnRefreshOpen">↻ Refresh</button></div></div>
+    <div id="openList"></div>
+  </section>
+  <section id="tab-resolved" hidden>
+    <div class="card">
+      <div class="row" style="justify-content:space-between"><h3 style="margin:0">✅ Resolved Tickets</h3><button class="btn secondary" id="btnRefreshResolved">↻ Refresh</button></div>
+      
+      <div class="row" style="margin-top:10px">
+        <select id="reportYear" style="flex:1"></select>
+        <select id="reportMonth" style="flex:1"></select>
+      </div>
+      <div class="row">
+        <button class="btn warn" id="btnReportStd" style="flex:1">📊 Standard Report</button>
+        <button class="btn secondary" id="btnReportCol" style="flex:1">📦 Collection Report</button>
+      </div>
+      <div class="help">Exports a monthly report sheet. 'Standard' excludes Collections. 'Collection' only counts occurrences.</div>
     </div>
+    <div id="resolvedList"></div>
+  </section>
+  <section id="tab-settings" hidden>
+    <div class="card">
+      <h3>🔌 Connection</h3>
+      <label>Google Apps Script Web App URL</label>
+      <input id="cfgUrl" placeholder="https://script.google.com/macros/s/.../exec" />
+      <div class="row" style="margin-top:10px"><button class="btn" id="btnSaveCfg">Save & Test</button><button class="btn secondary" id="btnBootstrap">Bootstrap Sheet</button></div>
+      <div class="help">Deploy <kbd>Code.gs</kbd> as Web App (Execute as Me, Access Anyone) and paste the URL here.</div>
+    </div>
+    <div class="card"><h3>👥 Staff Master</h3><div class="row"><input id="addStaff" placeholder="Add staff name" /><button class="btn" id="btnAddStaff">Add</button></div><div id="staffList" style="margin-top:8px"></div></div>
+    <div class="card"><h3>🔢 Serial Number Master</h3><div class="row"><input id="addSerial" placeholder="Serial (required)" /></div><div class="row"><input id="addSerialModel" placeholder="Model (optional)" /></div><div class="row"><input id="addSerialCustomer" placeholder="Customer (optional)" /><button class="btn" id="btnAddSerial">Add</button></div><div id="serialList" style="margin-top:8px"></div></div>
+    <div class="card"><h3>🏷 Type Master</h3><div class="row"><input id="addTrouble" placeholder="Add type (e.g. Collection)" /><button class="btn" id="btnAddTrouble">Add</button></div><div id="troubleList" style="margin-top:8px"></div></div>
+    <div class="card"><h3>ℹ About</h3><p class="help">Onsite Support Manager v1.4.1<br>All data lives in your Google Sheet.</p></div>
+  </section>
+</main>
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"><h2 id="modalTitle">Ticket</h2><div id="modalBody"></div><div class="modal-actions"><button class="btn secondary" id="modalClose">Close</button></div></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const STORAGE_KEY='onsite-support-config';
+let CONFIG=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+let MASTERS={staff:[],serials:[],trouble:[]};
+let CACHE={open:[],resolved:[]};
+let PHOTO_DATA = { photo1: null, photo2: null };
 
-    <script>
-        async def launchAIOffice() {
-            const sender = document.getElementById('senderName').value;
-            const msg = document.getElementById('messageContent').value;
-            if(!msg) return alert('内容を入力してください');
+async function api(action,payload={}){
+  if(!CONFIG.url) throw new Error('GAS URL not configured. Open ⚙ Settings.');
+  const body=JSON.stringify(Object.assign({},payload,{action:action}));
+  const res=await fetch(CONFIG.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body});
+  const text=await res.text();
+  let json;
+  try{json=JSON.parse(text);}catch(e){throw new Error('Bad response: '+text.slice(0,200));}
+  if(!json.ok) throw new Error(json.error||'Unknown error');
+  return json.data;
+}
+function $(id){return document.getElementById(id);}
+function toast(msg,isErr){const t=$('toast');t.textContent=msg;t.classList.toggle('error',!!isErr);t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),4000);}
+function fmtDate(d){if(!d)return'';const x=new Date(d);if(isNaN(x))return String(d);const pad=n=>String(n).padStart(2,'0');return x.getFullYear()+'-'+pad(x.getMonth()+1)+'-'+pad(x.getDate())+' '+pad(x.getHours())+':'+pad(x.getMinutes());}
+function fmtMonth(d){if(!d)return'Unknown';const x=new Date(d);if(isNaN(x))return'Unknown';return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0');}
+function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
-            document.getElementById('loader').style.display = 'block';
-            document.getElementById('results').style.display = 'none';
+function setupPhotoUploader(inputId, btnId, prevId, key) {
+  $(btnId).addEventListener('click', () => $(inputId).click());
+  $(inputId).addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast('Image is too large. Max 5MB.', true);
+      $(inputId).value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      PHOTO_DATA[key] = {
+        base64: event.target.result.split(',')[1],
+        mimeType: file.type,
+        name: file.name
+      };
+      $(prevId).innerHTML = '<img src="' + event.target.result + '" style="max-width:100%; max-height:70px; border-radius:6px; border:1px solid var(--border);"><div class="danger-link" style="margin-top:2px;" onclick="removePhoto(\'' + inputId + '\',\'' + prevId + '\',\'' + key + '\')">Delete</div>';
+    };
+    reader.readAsDataURL(file);
+  });
+}
+setupPhotoUploader('f_photo1', 'btnPhoto1', 'prev_photo1', 'photo1');
+setupPhotoUploader('f_photo2', 'btnPhoto2', 'prev_photo2', 'photo2');
 
-            // 🔗 トンネル経由で、ボスの自宅の新PC（Python）にアクセス
-            // ※ 次のステップで発行される「lhr.life」や「serveo.net」のURLに書き換えます
-            const tunnelUrl = "https://68ae41f8b5f091.lhr.life"; 
+window.removePhoto = function(inputId, prevId, key) {
+  PHOTO_DATA[key] = null;
+  $(inputId).value = '';
+  $(prevId).innerHTML = '';
+};
 
-            try {
-                const response = await fetch(`${tunnelUrl}/api/chat`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sender_name: sender, message: msg })
-                });
-                const data = await response.json();
+document.querySelectorAll('nav button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const tab=b.dataset.tab;
+    ['new','open','resolved','settings'].forEach(t=>$('tab-'+t).hidden=(t!==tab));
+    if(tab==='open')refreshOpen();
+    else if(tab==='resolved')refreshResolved();
+    else if(tab==='settings')renderMastersList();
+  });
+});
+$('cfgUrl').value=CONFIG.url||'';
+$('btnSaveCfg').addEventListener('click',async()=>{
+  const url=$('cfgUrl').value.trim();
+  if(!url)return toast('Enter URL',true);
+  CONFIG.url=url;localStorage.setItem(STORAGE_KEY,JSON.stringify(CONFIG));
+  try{const r=await api('ping');$('connBadge').textContent='connected v'+r.version;$('connBadge').style.background='rgba(0,255,0,.3)';toast('Connected ✓ v'+r.version);await loadMasters();await refreshOpen();}catch(e){toast(e.message,true);}
+});
+$('btnBootstrap').addEventListener('click',async()=>{
+  try{const r=await api('bootstrap');toast('Sheet ready');if(r.spreadsheetUrl){if(confirm('Spreadsheet ready. Open it now?\n\n'+r.spreadsheetUrl))window.open(r.spreadsheetUrl,'_blank');}await loadMasters();await refreshOpen();}catch(e){toast(e.message,true);}
+});
+async function loadMasters(){try{MASTERS=await api('getMasters');populateRequestForm();renderMastersList();}catch(e){toast(e.message,true);}}
+function populateRequestForm(){
+  const sel=(id,items,placeholder)=>{const el=$(id);el.innerHTML='<option value="">— '+placeholder+' —</option>'+items.map(v=>'<option value="'+escapeHtml(v)+'">'+escapeHtml(v)+'</option>').join('');};
+  sel('f_requester',MASTERS.staff,'select requester');
+  sel('f_troubleType',MASTERS.trouble,'select type');
+  
+  const container = $('f_serial_container');
+  if(MASTERS.serials.length === 0) {
+    container.innerHTML = '<div class="empty" style="padding:10px;">No serials found</div>';
+  } else {
+    container.innerHTML = MASTERS.serials.map(s => {
+      const display = escapeHtml(s.serial) + (s.model ? ' · ' + escapeHtml(s.model) : '') + (s.customer ? ' · ' + escapeHtml(s.customer) : '');
+      return `<label class="checkbox-item"><input type="checkbox" name="cb_serial" value="${escapeHtml(s.serial)}"> ${display}</label>`;
+    }).join('');
+  }
+}
 
-                if(data.status === 'success') {
-                    document.getElementById('custInfo').innerText = data.customer_info;
-                    document.getElementById('csRes').innerText = data.cs_response;
-                    document.getElementById('techRes').innerText = data.tech_response;
-                    document.getElementById('salesRes').innerText = data.sales_response;
-                    document.getElementById('results').style.display = 'block';
-                }
-            } catch (error) {
-                alert('新PCのPythonサーバーと通信できませんでした。トンネルが起動しているか確認してください。');
-            } finally {
-                document.getElementById('loader').style.display = 'none';
-            }
-        }
-    </script>
+function renderMastersList(){
+  const renderRow=(val,type)=>'<div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee"><span>'+escapeHtml(val)+'</span><span class="danger-link" data-type="'+type+'" data-val="'+escapeHtml(val)+'">delete</span></div>';
+  $('staffList').innerHTML=MASTERS.staff.map(v=>renderRow(v,'staff')).join('')||'<div class="empty">empty</div>';
+  $('serialList').innerHTML=MASTERS.serials.map(s=>{const display=s.serial+(s.model?' · '+s.model:'')+(s.customer?' · '+s.customer:'');return '<div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee"><span>'+escapeHtml(display)+'</span><span class="danger-link" data-type="serial" data-val="'+escapeHtml(s.serial)+'">delete</span></div>';}).join('')||'<div class="empty">empty</div>';
+  $('troubleList').innerHTML=MASTERS.trouble.map(v=>renderRow(v,'trouble')).join('')||'<div class="empty">empty</div>';
+  document.querySelectorAll('.danger-link').forEach(a=>{a.addEventListener('click',async e=>{const type=e.target.dataset.type,val=e.target.dataset.val;if(!confirm('Delete "'+val+'"?'))return;try{await api('deleteMaster',{type,value:val});toast('Deleted');await loadMasters();}catch(err){toast(err.message,true);}});});
+}
+$('btnAddStaff').addEventListener('click',async()=>{const v=$('addStaff').value.trim();if(!v)return;try{await api('addMaster',{type:'staff',value:v});$('addStaff').value='';await loadMasters();toast('Added');}catch(e){toast(e.message,true);}});
+$('btnAddSerial').addEventListener('click',async()=>{const serial=$('addSerial').value.trim();if(!serial)return;try{await api('addMaster',{type:'serial',value:{serial,model:$('addSerialModel').value.trim(),customer:$('addSerialCustomer').value.trim()}});$('addSerial').value='';$('addSerialModel').value='';$('addSerialCustomer').value='';await loadMasters();toast('Added');}catch(e){toast(e.message,true);}});
+$('btnAddTrouble').addEventListener('click',async()=>{const v=$('addTrouble').value.trim();if(!v)return;try{await api('addMaster',{type:'trouble',value:v});$('addTrouble').value='';await loadMasters();toast('Added');}catch(e){toast(e.message,true);}});
+
+$('btnClear').addEventListener('click',()=>{
+  $('f_requester').value='';
+  $('f_troubleType').value='';
+  $('f_troubleDetail').value='';
+  document.querySelectorAll('input[name="cb_serial"]').forEach(cb => cb.checked = false);
+  removePhoto('f_photo1', 'prev_photo1', 'photo1');
+  removePhoto('f_photo2', 'prev_photo2', 'photo2');
+});
+
+$('btnCreate').addEventListener('click',async()=>{
+  const selectedSerials = Array.from(document.querySelectorAll('input[name="cb_serial"]:checked')).map(cb => cb.value);
+  const payload={
+    requester:$('f_requester').value,
+    serial: selectedSerials.join(', '),
+    troubleType:$('f_troubleType').value,
+    troubleDetail:$('f_troubleDetail').value.trim(),
+    photo1: PHOTO_DATA.photo1,
+    photo2: PHOTO_DATA.photo2
+  };
+  if(!payload.requester||selectedSerials.length===0||!payload.troubleDetail)return toast('Requester, at least 1 Serial, and Detail are required',true);
+  
+  const btn=$('btnCreate');btn.disabled=true;btn.innerHTML='<span class="loader"></span> Submitting...';
+  try{
+    const r=await api('createRequest',payload);
+    toast('Request created: '+r.id);
+    $('btnClear').click();
+    document.querySelector('nav button[data-tab="open"]').click();
+  }catch(e){
+    toast(e.message,true);
+  }finally{
+    btn.disabled=false;btn.textContent='Submit Request';
+  }
+});
+
+function ticketCard(t){
+  const trouble=(t.TroubleType?'<span class="chip">'+escapeHtml(t.TroubleType)+'</span>':'');
+  const status=t.Status==='Open'?'<span class="chip open">OPEN</span>':'<span class="chip resolved">RESOLVED</span>'+(t.Outcome==='Unsolved'?'<span class="chip unsolved">UNSOLVED</span>':'');
+  return '<div class="card ticket" data-id="'+escapeHtml(t.ID)+'"><div class="ticket-h"><span><b>'+escapeHtml(t.ID)+'</b> · '+fmtDate(t.RequestedAt)+'</span><span>'+status+'</span></div><div class="ticket-t">'+escapeHtml(t.Serial||'')+' — '+escapeHtml(String(t.TroubleDetail||'').slice(0,80))+'</div><div class="ticket-h">'+trouble+'<span>by '+escapeHtml(t.Requester||'')+'</span></div>'+(t.Status==='Resolved'&&(t.WorkMinutes!==''&&t.WorkMinutes!=null)?'<div class="ticket-h"><span>Handler: '+escapeHtml(t.Handler||'')+'</span><span>'+t.WorkMinutes+' min</span></div>':'')+'</div>';
+}
+async function refreshOpen(){
+  const list=$('openList');list.innerHTML='<div class="empty">Loading…</div>';
+  try{CACHE.open=await api('listRequests',{status:'open'});if(!CACHE.open.length)list.innerHTML='<div class="empty">No open tickets 🎉</div>';else list.innerHTML=CACHE.open.map(ticketCard).join('');const c=$('openCount');c.textContent=CACHE.open.length;c.style.display=CACHE.open.length?'':'none';list.querySelectorAll('.ticket').forEach(el=>el.addEventListener('click',()=>openTicketDetail(el.dataset.id,'open')));}catch(e){list.innerHTML='<div class="empty">'+escapeHtml(e.message)+'</div>';}
+}
+async function refreshResolved(){
+  const list=$('resolvedList');list.innerHTML='<div class="empty">Loading…</div>';
+  try{CACHE.resolved=await api('listRequests',{status:'resolved'});if(!CACHE.resolved.length){list.innerHTML='<div class="empty">No resolved tickets yet</div>';return;}const groups={};CACHE.resolved.forEach(t=>{const k=fmtMonth(t.ResolvedAt||t.RequestedAt);(groups[k]=groups[k]||[]).push(t);});const keys=Object.keys(groups).sort().reverse();list.innerHTML=keys.map(k=>{const items=groups[k];const totalMin=items.reduce((s,r)=>s+(parseInt(r.WorkMinutes,10)||0),0);return '<div class="month-group"><div class="month-head"><span>'+k+'</span><span>'+items.length+' tickets · '+totalMin+' min</span></div>'+items.map(ticketCard).join('')+'</div>';}).join('');list.querySelectorAll('.ticket').forEach(el=>el.addEventListener('click',()=>openTicketDetail(el.dataset.id,'resolved')));}catch(e){list.innerHTML='<div class="empty">'+escapeHtml(e.message)+'</div>';}
+}
+$('btnRefreshOpen').addEventListener('click',refreshOpen);
+$('btnRefreshResolved').addEventListener('click',refreshResolved);
+
+function openTicketDetail(id,kind){
+  const t=(kind==='open'?CACHE.open:CACHE.resolved).find(x=>x.ID===id);if(!t)return;
+  $('modalTitle').innerHTML=t.ID+' — '+(t.Status==='Open'?'<span class="chip open">OPEN</span>':'<span class="chip resolved">RESOLVED</span>');
+  
+  const isCollection = String(t.TroubleType||'').trim().toLowerCase() === 'collection';
+
+  let html='';
+  html+='<p><b>Requested:</b> '+fmtDate(t.RequestedAt)+'</p>';
+  html+='<p><b>Requester:</b> '+escapeHtml(t.Requester||'')+'</p>';
+  html+='<p><b>Serial(s):</b> '+escapeHtml(t.Serial||'')+'</p>';
+  html+='<p><b>Type:</b> '+escapeHtml(t.TroubleType||'(none)')+'</p>';
+  html+='<p><b>Detail:</b><br>'+escapeHtml(t.TroubleDetail||'')+'</p>';
+  
+  if(t.Photo1) html+='<p>📸 <a href="'+escapeHtml(t.Photo1)+'" target="_blank">View Photo 1</a></p>';
+  if(t.Photo2) html+='<p>📸 <a href="'+escapeHtml(t.Photo2)+'" target="_blank">View Photo 2</a></p>';
+
+  if(t.ParentID)html+='<p class="help">↳ Re-opened from '+escapeHtml(t.ParentID)+'</p>';
+  
+  if(t.Status==='Open'){
+    html+='<hr><h3>Resolve Ticket</h3>';
+    
+    if (!isCollection) {
+      html+='<label>Cause</label><textarea id="r_cause" placeholder="Root cause..."></textarea>';
+      html+='<label>Action Taken</label><textarea id="r_action" placeholder="What was done..."></textarea>';
+    }
+
+    html+='<label>Handler</label><select id="r_handler"><option value="">— select —</option>'+MASTERS.staff.map(s=>'<option>'+escapeHtml(s)+'</option>').join('')+'</select>';
+    
+    html+='<label>Work Time</label><select id="r_minutes">';
+    if (isCollection) {
+      html+='<option value="0">0 h (0 min)</option>';
+    } else {
+      html+='<option value="0">0 h (0 min)</option>';
+      for(let m=30;m<=240;m+=30)html+='<option value="'+m+'">'+(m/60).toFixed(1)+' h ('+m+' min)</option>';
+    }
+    html+='</select>';
+
+    html+='<label>Outcome</label><select id="r_outcome"><option value="Solved">Solved</option><option value="Unsolved">Unsolved → spawn new ticket</option></select>';
+    html+='<div class="row" style="margin-top:12px"><button class="btn success" id="btnDoResolve">✔ Mark Resolved</button></div>';
+  }else{
+    if(!isCollection) {
+      html+='<hr><p><b>Cause:</b><br>'+escapeHtml(t.Cause||'')+'</p>';
+      html+='<p><b>Action:</b><br>'+escapeHtml(t.Action||'')+'</p>';
+    }
+    html+='<p><b>Handler:</b> '+escapeHtml(t.Handler||'')+' · '+escapeHtml(String(t.WorkMinutes||''))+' min</p>';
+    html+='<p><b>Resolved:</b> '+fmtDate(t.ResolvedAt)+' · Outcome: '+escapeHtml(t.Outcome||'')+'</p>';
+    html+='<hr><h3>Re-open as new request?</h3>';
+    html+='<label>Additional detail (optional)</label><textarea id="ro_detail" placeholder="What is still wrong..."></textarea>';
+    html+='<label>Requester</label><select id="ro_requester"><option value="">— same as original —</option>'+MASTERS.staff.map(s=>'<option>'+escapeHtml(s)+'</option>').join('')+'</select>';
+    html+='<div class="row" style="margin-top:12px"><button class="btn warn" id="btnDoReopen">↻ Re-open ticket</button></div>';
+  }
+  $('modalBody').innerHTML=html;$('modalBg').classList.add('show');
+
+  const btnR=$('btnDoResolve');
+  if(btnR)btnR.addEventListener('click',async()=>{
+    const modal=$('modal');
+    const causeEl = modal.querySelector('#r_cause');
+    const actionEl = modal.querySelector('#r_action');
+    const handlerEl = modal.querySelector('#r_handler');
+    const minutesEl = modal.querySelector('#r_minutes');
+    const outcomeEl = modal.querySelector('#r_outcome');
+
+    const cause = causeEl ? causeEl.value : '-';
+    const actionText = actionEl ? actionEl.value : '-';
+    const handler = handlerEl ? handlerEl.value : '';
+    // 数値の0を文字列の "0" として明示的に渡し、かつ空文字チェックに引っかからないようにする
+    const workMinutes = minutesEl ? String(minutesEl.value) : '0';
+    const outcome = outcomeEl ? outcomeEl.value : 'Solved';
+    
+    const missing=[];
+    if (!isCollection) {
+      if(!String(cause).trim()) missing.push('Cause');
+      if(!String(actionText).trim()) missing.push('Action Taken');
+    }
+    if(!String(handler).trim()) missing.push('Handler');
+    
+    if(missing.length){toast('Missing: '+missing.join(', '),true);return;}
+    
+    const payload={id:t.ID,cause:String(cause).trim(),actionText:String(actionText).trim(),handler:String(handler).trim(),workMinutes:workMinutes,outcome:outcome};
+    btnR.disabled=true;btnR.innerHTML='<span class="loader"></span> Saving...';
+    try{
+      const r=await api('resolveRequest',payload);
+      toast(r.newId?'Resolved. New ticket: '+r.newId:'Resolved ✓');
+      closeModal();await refreshOpen();
+    }catch(e){
+      toast('Server error: '+e.message,true);
+    }finally{
+      btnR.disabled=false;btnR.textContent='✔ Mark Resolved';
+    }
+  });
+
+  const btnRo=$('btnDoReopen');
+  if(btnRo)btnRo.addEventListener('click',async()=>{
+    btnRo.disabled=true;btnRo.innerHTML='<span class="loader"></span> Re-opening...';
+    try{const r=await api('reopenRequest',{id:t.ID,troubleDetail:$('ro_detail').value.trim(),requester:$('ro_requester').value});toast('Re-opened as '+r.id);closeModal();document.querySelector('nav button[data-tab="open"]').click();}catch(e){toast(e.message,true);}finally{btnRo.disabled=false;btnRo.textContent='↻ Re-open ticket';}
+  });
+}
+function closeModal(){$('modalBg').classList.remove('show');$('modalBody').innerHTML='';}
+$('modalClose').addEventListener('click',closeModal);
+$('modalBg').addEventListener('click',e=>{if(e.target.id==='modalBg')closeModal();});
+
+(function initReportSelectors(){
+  const now=new Date();const yEl=$('reportYear');const mEl=$('reportMonth');
+  for(let y=now.getFullYear()+1;y>=now.getFullYear()-3;y--)yEl.insertAdjacentHTML('beforeend','<option value="'+y+'"'+(y===now.getFullYear()?' selected':'')+'>'+y+'</option>');
+  for(let m=1;m<=12;m++)mEl.insertAdjacentHTML('beforeend','<option value="'+m+'"'+(m===now.getMonth()+1?' selected':'')+'>'+String(m).padStart(2,'0')+'</option>');
+})();
+
+async function generateReport(type) {
+  const btn = type === 'standard' ? $('btnReportStd') : $('btnReportCol');
+  const originalText = btn.textContent;
+  btn.disabled=true;btn.innerHTML='<span class="loader"></span> Gen...';
+  try{
+    const r=await api('monthlyReport',{year:$('reportYear').value,month:$('reportMonth').value, type: type});
+    toast(r.sheetName+' ready ('+r.totals.count+' tickets)');
+    if(r.sheetUrl&&confirm('Report generated. Open it?\n\nTickets: '+r.totals.count)) window.open(r.sheetUrl,'_blank');
+  }catch(e){
+    toast(e.message,true);
+  }finally{
+    btn.disabled=false;btn.textContent=originalText;
+  }
+}
+$('btnReportStd').addEventListener('click', () => generateReport('standard'));
+$('btnReportCol').addEventListener('click', () => generateReport('collection'));
+
+// アプリ初期化時の自動読み込みフローを完全同期化
+(async function init(){
+  if(CONFIG.url){try{const r=await api('ping');$('connBadge').textContent='connected v'+r.version;$('connBadge').style.background='rgba(0,255,0,.3)';await loadMasters();await refreshOpen();}catch(e){$('connBadge').textContent='error';$('connBadge').style.background='rgba(255,0,0,.4)';}}else{document.querySelector('nav button[data-tab="settings"]').click();toast('Set GAS URL in ⚙ Settings');}
+})();
+</script>
 </body>
 </html>
